@@ -1,17 +1,42 @@
 const express = require('express');
-const productMatcher = require('../lib/product-matcher');
 require('dotenv').config();
 
 const app = express();
 app.use(express.json());
 
+// Lazy load product matcher to avoid initialization issues on startup
+let productMatcher;
+const getProductMatcher = () => {
+  if (!productMatcher) {
+    productMatcher = require('../lib/product-matcher');
+  }
+  return productMatcher;
+};
+
 // Health check
 app.get('/health', (req, res) => {
+  const requiredEnvVars = [
+    'OPENAI_API_KEY',
+    'PINECONE_API_KEY', 
+    'PINECONE_INDEX_NAME',
+    'FIREBASE_PROJECT_ID',
+    'FIREBASE_CLIENT_EMAIL',
+    'FIREBASE_PRIVATE_KEY'
+  ];
+  
+  const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+  
   res.json({ 
     status: 'healthy',
     timestamp: new Date().toISOString(),
     service: 'kasbah-product-matcher',
-    version: '1.0.0'
+    version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
+    envVars: {
+      configured: requiredEnvVars.length - missingEnvVars.length,
+      missing: missingEnvVars.length,
+      missingVars: missingEnvVars
+    }
   });
 });
 
@@ -35,7 +60,8 @@ app.post('/generate-products', async (req, res) => {
     const startTime = Date.now();
     
     // Generate matches
-    const results = await productMatcher.generateProducts(supplyList, userContext);
+    const matcher = getProductMatcher();
+    const results = await matcher.generateProducts(supplyList, userContext);
     
     const processingTime = Date.now() - startTime;
     
@@ -79,7 +105,8 @@ app.post('/test-match', async (req, res) => {
       userId: "test-user"
     };
     
-    const results = await productMatcher.generateProducts(testSupplyList, testContext);
+    const matcher = getProductMatcher();
+    const results = await matcher.generateProducts(testSupplyList, testContext);
     
     res.json({
       success: true,
