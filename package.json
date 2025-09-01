@@ -1,0 +1,40 @@
+{
+  "name": "kasbah-product-matcher",
+  "version": "1.0.0",
+  "description": "50K Product Matching System with Vector Search",
+  "main": "functions/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "start": "node functions/index.js",
+    "dev": "nodemon functions/index.js",
+    "sync": "node scripts/sync-to-pinecone.js",
+    "sync-recent": "node scripts/sync-recent-products.js",
+    "test": "node test/test-matching.js",
+    "setup-pinecone": "node scripts/setup-pinecone.js",
+    "monitor": "node scripts/monitor.js"
+  },
+  "keywords": [
+    "vector-search",
+    "product-matching",
+    "pinecone",
+    "firebase",
+    "embeddings"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@pinecone-database/pinecone": "^6.1.2",
+    "axios": "^1.11.0",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "firebase-admin": "^13.4.0",
+    "openai": "^5.16.0",
+    "redis": "^5.8.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
